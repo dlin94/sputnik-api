@@ -10,6 +10,9 @@ http://www.sputnikmusic.com/search_results.php?search_text=<artistname>
 (if there is one) and go to that page
   -It'll say '"search_item" was not found in our database'
 
+-Error messages
+-Limits
+-Cache needs to be fixed to accommodate query strings
 ------
 
 Deployment: http://flask.pocoo.org/docs/0.12/deploying/

@@ -14,8 +14,6 @@ for line in f.readlines():
 f.close()
 
 class Sputnik:
-    # Follow this URL pattern instead: http://www.sputnikmusic.com/topalbums.php?t=97&year=2015
-    # where t is a genre number
     @staticmethod
     def get_chart(year, genre, limit=0):
         chart = { }
@@ -34,7 +32,6 @@ class Sputnik:
             chart["year"] = "all"
         if (genre != None):
             if genre.upper() not in genres:
-                # TODO: Read this discussion: http://ux.stackexchange.com/questions/85451/when-invalid-querystring-paramater-detected-in-a-web-page-url-throw-an-error-or
                 print("Bad genre given.")
                 return
             url += "t=" + genres[genre.upper()]
@@ -50,8 +47,6 @@ class Sputnik:
 
         i = 1
         for row in rows:
-            # info_dict_1 = { } # for first artist
-            # info_dict_2 = { } # for second artist
             for j in range(1, 5, 2):
                 try:
                     info = row.contents[j]
@@ -59,7 +54,7 @@ class Sputnik:
                     break
 
                 # image: info.find("img", class_="lazy")
-                info_dict = { } # need to find a way to add album art to the same dict without adding the other artist's info
+                info_dict = { }
 
                 artist_and_score = info.find_all("b")
                 info_dict['artist'] = artist_and_score[0].get_text()
@@ -67,7 +62,6 @@ class Sputnik:
                 info_dict['album'] = info.find("font", class_="darktext").get_text()
                 info_dict['votes'] = info.find("font", class_="contrasttext").get_text()[:-6]
                 info_dict['ranking'] = i
-                #chart[i] = info_dict
                 albums.append(info_dict)
 
                 i += 1

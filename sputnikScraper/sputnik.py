@@ -121,6 +121,7 @@ class Sputnik:
 
         user = { 'username': username}
         user.update(get_user_info(soup))
+        user['favorite_bands'] = get_user_favorite_bands(soup)
         return user
 
 
@@ -239,11 +240,27 @@ def get_user_info(soup):
         if type(child) is bs4.element.NavigableString or child.get_text() == '':
             continue
 
-        if child['class'] == ['category']:
-            category = child.string.lower().replace(" ", "_")
-            info[category] = ''
-        elif child['class'] == ['normal']:
+        if child['class'] == ['normal']:
             val = child.string
             category = child.previous_sibling.previous_sibling.string.lower().replace(" ", "_")
+            if category == 'album_ratings' or category == 'reviews':
+                category = category[:-1] + '_count'
             info[category] = val
     return info
+
+def get_user_favorite_bands(soup):
+    band_box = soup.find_all("div", class_="roundedcornr_content_405948")[1]
+    band_box = band_box.find_all("a")
+    bands = []
+    for band in band_box:
+        bands.append(band.string)
+    return bands
+
+def get_user_ratings(soup):
+    pass
+
+def get_user_reviews(soup):
+    pass
+
+def get_user_lists(soup):
+    pass

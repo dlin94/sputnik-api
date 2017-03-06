@@ -16,6 +16,7 @@ f.close()
 class Sputnik:
     # Follow this URL pattern instead: http://www.sputnikmusic.com/topalbums.php?t=97&year=2015
     # where t is a genre number
+    @staticmethod
     def get_chart(year, genre, limit=0):
         chart = { }
         # Build request URL
@@ -74,7 +75,8 @@ class Sputnik:
 
         return chart
 
-    def get_artist(artist_id):
+    @staticmethod
+    def get_artist(artist_id): # TODO: get artist name
         try:
             int(artist_id)
         except ValueError:
@@ -89,24 +91,47 @@ class Sputnik:
             return
 
         artist = { }
-        artist["genres"] = get_genres(soup)
-        artist["similar"] = get_similar(soup)
-        artist["description"] = get_description(soup)
-        artist["releases"] = get_releases(soup)
+        artist["genres"] = get_artist_genres(soup)
+        artist["similar"] = get_artist_similar(soup)
+        artist["description"] = get_artist_description(soup)
+        artist["releases"] = get_artist_releases(soup)
         return artist
+
+    @staticmethod
+    def get_album(album_id):
+        try:
+            int(album_id)
+        except ValueError:
+            print("Non-integer id given.")
+            return
+
+        url = 'http://www.sputnikmusic.com/soundoff.php?albumid=' + album_id
+        req = requests.get(url)
+        soup = bs4.BeautifulSoup(req.text, "lxml")
+
+        album = { }
+        artist, album_name, rating, year = get_album_info(soup)
+        album["artist"] = artist
+        album["album"] = album_name
+        album["rating"] = rating
+        album["year"] = year
+        album["rating_count"] = get_album_rating_count(soup)
+        album["tracks"] = get_album_tracklist(album_id)
+        return album
+
 
 ################################################################################
 # Artist helpers
 ################################################################################
 headers = ["LPs", "EPs", "Compilations", "Live Albums"]
-def get_genres(soup):
+def get_artist_genres(soup):
     genres = soup.find("ul", class_="tags").contents
     genre_list = []
     for genre in genres:
         genre_list.append(genre.get_text())
     return genre_list
 
-def get_similar(soup):
+def get_artist_similar(soup):
     sims = soup.find("table", class_="bandbox").next_sibling.contents
     sims_list = []
     for sim in sims:
@@ -115,7 +140,7 @@ def get_similar(soup):
             sims_list.append(sim.get_text())
     return sims_list
 
-def get_description(soup):
+def get_artist_description(soup):
     try:
         desc =  soup.find(id="slidebox").get_text()
     except AttributeError:
@@ -124,7 +149,7 @@ def get_description(soup):
     desc = desc.replace("  « hide", " ")
     return desc
 
-def get_releases(soup):
+def get_artist_releases(soup):
     releases = []
     release_table = soup.find("table", class_="plaincontentbox")
     lp_header = release_table.contents[2]
@@ -133,13 +158,13 @@ def get_releases(soup):
     album_row = lp_header
     while album_row is not None:
         album_row = album_row.next_sibling
-        album_row, albums = get_albums(album_row)
+        album_row, albums = get_artist_albums(album_row)
         for album in albums:
             releases.append(album)
     return releases
 
-# Helper for get_releases()
-def get_albums(album_row):
+# Helper for get_artist_releases()
+def get_artist_albums(album_row):
     albums = [ ]
     while album_row is not None and album_row.get_text() not in headers:
         # Each album row has at most 2 albums
@@ -158,3 +183,43 @@ def get_albums(album_row):
             albums.append(release)
         album_row = album_row.next_sibling
     return (album_row, albums) # stops at a header
+
+################################################################################
+# Album helpers
+################################################################################
+def get_album_info(soup):
+    try:
+        tr = soup.find("tr", class_="alt1")
+        info = tr.contents[1]
+        artist = info.contents[0].get_text()
+        album_name = info.contents[2].string
+
+        other_info = tr.find("tr")
+        rating = other_info.contents[0].contents[0].contents[0].get_text()
+        year = other_info.contents[1].contents[0].contents[1].string
+        return (artist, album_name, rating, year)
+    except AttributeError:
+        return ('', '', '', '')
+
+def get_album_rating_count(soup):
+    ratings_tab = soup.find("td", class_="reviewtabs_selected").get_text()
+    count = ratings_tab[9:-1]
+    return count
+
+def get_album_tracklist(album_id):
+    url = 'http://www.sputnikmusic.com/tracklist.php?albumid=' + album_id
+    req = requests.get(url)
+    soup = bs4.BeautifulSoup(req.text, "lxml")
+    soup = soup.find("table")
+    tracklist = []
+    for line in soup.get_text().splitlines():
+        try:
+            int(line[0])
+        except ValueError:
+            continue
+        line_split = line.split(" ")
+        num = line_split[0][:-1]
+        name = " ".join(line_split[1:])
+        track = { "track_number": num, "track_name": name }
+        tracklist.append(track)
+    return tracklist

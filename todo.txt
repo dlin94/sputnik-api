@@ -1,9 +1,14 @@
 TODO:
 
--Write a script to get the genre id of each genre. Put each genre, id pair
-in a csv file called "genres.csv"
--In sputnik.py, read from this csv file to generate a mapping from genre to id
--
+-Use scrapy to crawl through site, finding artist/id and album/id pairs
+-Put these into a csv file
+
+http://www.sputnikmusic.com/search_results.php?search_text=<artistname>
+-Allow user to put in artist name (have two methods: get_artist_by_id() and get_artist_by_name())
+-If the page redirects to an actual artist's page, then find all the data from there
+-Else, if the page goes to a search results page, then take the top search result
+(if there is one) and go to that page
+  -It'll say '"search_item" was not found in our database'
 
 ------
 
@@ -15,6 +20,7 @@ http://stackoverflow.com/questions/12269537/safe-to-deploy-flask-frameworks-webs
 API endpoints:
 
 1. /artist/<artist id>
+http://www.last.fm/api/show/artist.getInfo for inspiration
 
 2. /chart
 optional params:
@@ -24,12 +30,20 @@ limit
 
 3. /album/<album id>
 To get the album from just the album id, scrape the following url: http://www.sputnikmusic/album/<album id>/a
+http://www.sputnikmusic.com/soundoff.php?albumid=<album_id>
+http://www.sputnikmusic.com/tracklist.php?albumid=<album_id>
+The easiest way to find the album id is to look at the number associated with the album's art.
+http://www.sputnikmusic.com/images/albums/<album_id>.jpg
 Return:
 -Album art
 -Average rating
 -Number of ratings
 -Rating distribution
--Reviews (?) (maybe make this a separate endpoint)
+-number of reviews
+
+- /album/<album id>/reviews
+-include all of above along with reviews
+-Reviews
 
 4. /review/<review id>
 To get the review from just the review id, scrape the following url: http://www.sputnikmusic.com/review/<review id>/a/

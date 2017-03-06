@@ -113,6 +113,16 @@ class Sputnik:
         album["tracks"] = get_album_tracklist(album_id)
         return album
 
+    @staticmethod
+    def get_user(username):
+        url = 'http://www.sputnikmusic.com/user/' + username
+        req = requests.get(url)
+        soup = bs4.BeautifulSoup(req.text, "lxml")
+
+        user = { 'username': username}
+        user.update(get_user_info(soup))
+        return user
+
 
 ################################################################################
 # Artist helpers
@@ -217,3 +227,23 @@ def get_album_tracklist(album_id):
         track = { "track_number": num, "track_name": name }
         tracklist.append(track)
     return tracklist
+
+################################################################################
+# User helpers
+################################################################################
+def get_user_info(soup):
+    info_box = soup.find("font", class_="category").parent
+    info = { }
+    info["title"] = info_box.contents[0].string
+    for child in info_box.contents[3:]:
+        if type(child) is bs4.element.NavigableString or child.get_text() == '':
+            continue
+
+        if child['class'] == ['category']:
+            category = child.string.lower().replace(" ", "_")
+            info[category] = ''
+        elif child['class'] == ['normal']:
+            val = child.string
+            category = child.previous_sibling.previous_sibling.string.lower().replace(" ", "_")
+            info[category] = val
+    return info

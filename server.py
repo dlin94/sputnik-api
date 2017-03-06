@@ -37,3 +37,9 @@ def artist(artist_id):
 def album(album_id):
     album = Sputnik.get_album(album_id)
     return jsonify(album)
+
+@app.route('/user/<username>', methods=['GET'])
+@cache.cached(300)
+def user(username):
+    user = Sputnik.get_user(username)
+    return jsonify(user)

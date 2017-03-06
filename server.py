@@ -3,7 +3,7 @@ from flask_cache import Cache
 import requests
 import bs4
 import json
-from sputnikScraper.sputnik import Sputnik
+from sputnik_scraper.sputnik import Sputnik
 
 app = Flask(__name__)
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})

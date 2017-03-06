@@ -246,6 +246,17 @@ def get_user_info(soup):
             if category == 'album_ratings' or category == 'reviews':
                 category = category[:-1] + '_count'
             info[category] = val
+    # These won't show up if user doesn't have them
+    if "review_count" not in info:
+        info["review_count"] = "0"
+    if "approval" not in info:
+        info["approval"] = "0%"
+    if "band_edits_+_tags" not in info:
+        info["band_edits_+_tags"] = "0"
+    if "objectivity" not in info:
+        info["objectivity"] = "0%"
+    if "news_articles" not in info:
+        info["news_articles"] = "0"
     return info
 
 def get_user_favorite_bands(soup):

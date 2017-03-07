@@ -13,7 +13,7 @@ from sputnik_scraper.sputnik import Sputnik
 app = Flask(__name__)
 redis_url = urlparse(os.environ.get('REDIS_URL'))
 redis = StrictRedis(host=redis_url.hostname, port=redis_url.port, password=redis_url.password, db=0) #host='localhost' port=6379
-cache = Cache(app, config={'CACHE_TYPE': 'redis'})
+cache = Cache(app, config={'CACHE_TYPE': 'redis', 'CACHE_REDIS_URL': os.environ.get('REDIS_URL')})
 
 # http://flask.pocoo.org/snippets/70/
 class RateLimit(object):

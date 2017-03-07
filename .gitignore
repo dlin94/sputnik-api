@@ -1,4 +1,5 @@
 __pycache__/
 *.pyc
+*.rdb
 todo.txt
 useful-links.txt

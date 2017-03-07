@@ -53,7 +53,7 @@ class Sputnik:
                 except IndexError:
                     break
 
-                # image: info.find("img", class_="lazy")
+                # image: info.find("img", class_="lazy") /
                 info_dict = { }
 
                 artist_and_score = info.find_all("b")

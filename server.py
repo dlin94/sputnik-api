@@ -12,7 +12,7 @@ from sputnik_scraper.sputnik import Sputnik
 
 app = Flask(__name__)
 redis_url = urlparse(os.environ.get('REDIS_URL'))
-redis = StrictRedis(host=redis_url.geturl(), port=redis_url.port, db=0) #host='localhost' port=6379
+redis = StrictRedis(host=redis_url.hostname, port=redis_url.port, db=0) #host='localhost' port=6379
 cache = Cache(app, config={'CACHE_TYPE': 'redis'})
 
 # http://flask.pocoo.org/snippets/70/

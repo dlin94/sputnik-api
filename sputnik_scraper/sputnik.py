@@ -122,8 +122,8 @@ class Sputnik:
         user = { 'username': username}
         user.update(get_user_info(soup))
         user['favorite_bands'] = get_user_favorite_bands(soup)
+        user['ratings_info'] = get_user_ratings(soup)
 
-        get_user_ratings(soup)
         return user
 
 
@@ -270,21 +270,16 @@ def get_user_favorite_bands(soup):
     return bands
 
 def get_user_ratings(soup):
+    ratings_info = { }
     url = "http://www.sputnikmusic.com"
     url += soup.find("li", id="current").next_sibling.next_sibling.find("a")["href"]
     req = requests.get(url)
     ratings_soup = bs4.BeautifulSoup(req.text, "lxml")
-    ratings_info = soup.find("table").contents[3].find("div", class_="roundedcornr_content_405948")
-    #ratings_info = ratings_info.find("tr")#.find("td").contents
-    for child in ratings_info:
-        if type(child) is bs4.element.Tag:
-            pass
-            #print(child.get_text())
-        else:
-            pass
-            #print(child.string)
+    ratings_info["avg_rating"] = ratings_soup.find(text="Average Rating:").parent.next_sibling.string.replace(" ", "")
+    ratings_info["rating_variance"] = ratings_soup.find(text="Rating Variance:").parent.next_sibling.string.replace(" ", "")
+    ratings_info["objectivity"] = ratings_soup.find(text="Objectivity Score:").parent.next_sibling.string.replace(" ", "")
 
-    return
+    return ratings_info
 
 def get_user_reviews(soup):
     pass

@@ -19,8 +19,8 @@ redis = StrictRedis(host=redis_url.hostname, # 'localhost'
                     port=redis_url.port, # 6379
                     password=redis_url.password,
                     db=0)
-cache = Cache(app, config={'CACHE_TYPE': 'redis',
-                           'CACHE_REDIS_URL': os.environ.get('REDIS_URL')})
+cache = Cache(app, config={'CACHE_TYPE': 'redis'})#,
+                           #'CACHE_REDIS_URL': os.environ.get('REDIS_URL')})
 
 ################################################################################
 # Rate limit helpers
@@ -49,11 +49,11 @@ def on_over_limit(limit):
 
 def ratelimit(limit, per=300,
               over_limit=on_over_limit,
-              scope_func=lambda: request.remote_addr,
-              key_func=lambda: request.endpoint):
+              scope_func=lambda: request.remote_addr):#,
+              #key_func=lambda: request.endpoint):
     def decorator(func):
         def rate_limited(*args, **kwargs):
-            key = 'rate-limit/%s/%s/' % (key_func(), scope_func())
+            key = 'rate-limit/%s/' % (scope_func())#'rate-limit/%s/%s/' % (key_func(), scope_func())
             rlimit = RateLimit(key, limit, per)
             g._view_rate_limit = rlimit
             if over_limit is not None and rlimit.over_limit:

@@ -1,12 +1,15 @@
 from flask import Flask, request, jsonify
 from flask_cache import Cache
+from redis import StrictRedis
 import requests
 import bs4
 import json
 from sputnik_scraper.sputnik import Sputnik
 
 app = Flask(__name__)
-cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+#cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+redis = StrictRedis(host='localhost', port=6379, db=0)
+cache = Cache(app, config={'CACHE_TYPE': 'redis'})
 
 def make_cache_key(*args, **kwargs):
     return request.url
@@ -42,4 +45,5 @@ def album(album_id):
 @cache.cached(300)
 def user(username):
     user = Sputnik.get_user(username)
+    #print(redis.get("flask_cache_view//user/mynameischan"))
     return jsonify(user)

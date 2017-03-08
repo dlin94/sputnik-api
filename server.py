@@ -129,3 +129,14 @@ def user(username):
         return 'Bad message\n', 400
 
     return jsonify(user), 200
+
+@app.route('/user/<username>/reviews', methods=['GET'])
+@ratelimit(limit=30, per=60)
+@cache.cached(300)
+def user_reviews(username):
+    user_reviews = Sputnik.get_user_reviews(username)
+
+    if user_reviews == -1:
+        return 'Bad message\n', 400
+
+    return jsonify(user_reviews), 200

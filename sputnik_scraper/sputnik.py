@@ -119,14 +119,42 @@ class Sputnik:
         req = requests.get(url)
         soup = bs4.BeautifulSoup(req.text, "lxml")
 
-        # Check if the user exists
-        if soup.get_text().lower().find(username.lower()) == -1:
+        if not user_exists(soup, username):
             return -1
 
         user = { 'username': username}
         user.update(get_user_info(soup))
         user['favorite_bands'] = get_user_favorite_bands(soup)
         user['ratings_info'] = get_user_ratings(soup)
+
+        return user
+
+    @staticmethod
+    def get_user_reviews(username):
+        url = 'http://www.sputnikmusic.com/user/' + username
+        req = requests.get(url)
+        soup = bs4.BeautifulSoup(req.text, "lxml")
+
+        if not user_exists(soup, username):
+            return -1
+
+        review_url = 'http://www.sputnikmusic.com'
+        review_url += soup.find("li", id="current").parent.contents[7].find("a")["href"]
+        req = requests.get(review_url)
+        review_soup = bs4.BeautifulSoup(req.text, "lxml")
+        rows = review_soup.find_all("td", class_="highlightrow")
+        review_list = []
+        for row in rows:
+            review_info = { }
+            review_info["artist"] = row.find("strong").string
+            review_info["album"] = row.find("strong").next_sibling.string[1:]
+            review_info["score"] = row.next_sibling.find("strong").get_text()
+            review_info["date"] = row.next_sibling.find("strong").next_sibling.string
+            review_list.append(review_info)
+
+        user = { 'username': username,
+                 'reviews': review_list,
+                 'review_count': len(review_list)}
 
         return user
 
@@ -237,6 +265,9 @@ def get_album_tracklist(album_id):
 ################################################################################
 # User helpers
 ################################################################################
+def user_exists(soup, username):
+    return soup.get_text().lower().find(username.lower()) != -1
+
 def get_user_info(soup):
     info_box = soup.find("font", class_="category").parent
     info = { }
@@ -283,9 +314,6 @@ def get_user_ratings(soup):
     ratings_info["objectivity"] = ratings_soup.find(text="Objectivity Score:").parent.next_sibling.string.replace(" ", "")
 
     return ratings_info
-
-def get_user_reviews(soup):
-    pass
 
 def get_user_lists(soup):
     pass

@@ -2,5 +2,6 @@ __pycache__/
 *.pyc
 *.rdb
 test.py
+cache.py
 todo.txt
 useful-links.txt

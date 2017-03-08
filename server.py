@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, request, g
-from flask_cache import Cache
+#from flask_cache import Cache
 from functools import update_wrapper
 from redis import StrictRedis
 from urllib.parse import urlparse
@@ -9,6 +9,7 @@ import requests
 import bs4
 import json
 from sputnik_scraper.sputnik import Sputnik
+from cache import Cache
 
 ################################################################################
 # Initialize
@@ -19,8 +20,9 @@ redis = StrictRedis(host=redis_url.hostname, # 'localhost'
                     port=redis_url.port, # 6379
                     password=redis_url.password,
                     db=0)
-cache = Cache(app, config={'CACHE_TYPE': 'redis',
-                           'CACHE_REDIS_URL': os.environ.get('REDIS_URL')})
+cache = Cache(redis)
+#cache = Cache(app, config={'CACHE_TYPE': 'redis',
+#                           'CACHE_REDIS_URL': os.environ.get('REDIS_URL')})
 
 ################################################################################
 # Rate limit helpers -- adapted from: http://flask.pocoo.org/snippets/70/
@@ -99,7 +101,7 @@ def chart():
 
 @app.route('/artist/<artist_id>', methods=['GET'])
 @ratelimit(limit=30, per=60)
-@cache.cached(300)
+@cache.cached(300, key_prefix=make_cache_key)
 def artist(artist_id):
     artist = Sputnik.get_artist(artist_id)
 
@@ -110,7 +112,7 @@ def artist(artist_id):
 
 @app.route('/album/<album_id>', methods=['GET'])
 @ratelimit(limit=30, per=60)
-@cache.cached(300)
+@cache.cached(300, key_prefix=make_cache_key)
 def album(album_id):
     album = Sputnik.get_album(album_id)
 
@@ -121,7 +123,7 @@ def album(album_id):
 
 @app.route('/user/<username>', methods=['GET'])
 @ratelimit(limit=30, per=60)
-@cache.cached(300)
+@cache.cached(300, key_prefix=make_cache_key)
 def user(username):
     user = Sputnik.get_user(username)
 
@@ -132,7 +134,7 @@ def user(username):
 
 @app.route('/user/<username>/reviews', methods=['GET'])
 @ratelimit(limit=30, per=60)
-@cache.cached(300)
+@cache.cached(300, key_prefix=make_cache_key)
 def user_reviews(username):
     user_reviews = Sputnik.get_user_reviews(username)
 

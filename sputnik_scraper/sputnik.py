@@ -24,7 +24,7 @@ class Sputnik:
                 int(year)
             except ValueError:
                 print("Non-integer year given.")
-                return
+                return -1
             url += "year=" + year + "&"
             chart["year"] = year
         else: # no year provided, so assume all-time (9999)
@@ -33,7 +33,7 @@ class Sputnik:
         if (genre != None):
             if genre.upper() not in genres:
                 print("Bad genre given.")
-                return
+                return -1
             url += "t=" + genres[genre.upper()]
             chart["genre"] = genre.lower()
         else:
@@ -125,7 +125,6 @@ class Sputnik:
         user['ratings_info'] = get_user_ratings(soup)
 
         return user
-
 
 ################################################################################
 # Artist helpers

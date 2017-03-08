@@ -75,14 +75,14 @@ class Sputnik:
             int(artist_id)
         except ValueError:
             print("Non-integer id given.")
-            return
+            return -1
 
         url = "http://sputnikmusic.com/bands/a/" + artist_id
         req = requests.get(url)
         soup = bs4.BeautifulSoup(req.text, "lxml")
 
         if soup.find("table", class_="bandbox") == None:
-            return
+            return -1
 
         artist = { }
         artist["genres"] = get_artist_genres(soup)
@@ -97,7 +97,7 @@ class Sputnik:
             int(album_id)
         except ValueError:
             print("Non-integer id given.")
-            return
+            return -1
 
         url = 'http://www.sputnikmusic.com/soundoff.php?albumid=' + album_id
         req = requests.get(url)
@@ -118,6 +118,10 @@ class Sputnik:
         url = 'http://www.sputnikmusic.com/user/' + username
         req = requests.get(url)
         soup = bs4.BeautifulSoup(req.text, "lxml")
+
+        # Check if the user exists
+        if soup.get_text().lower().find(username.lower()) == -1:
+            return -1
 
         user = { 'username': username}
         user.update(get_user_info(soup))
